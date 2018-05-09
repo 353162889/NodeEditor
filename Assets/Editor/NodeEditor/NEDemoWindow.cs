@@ -20,15 +20,18 @@ public class NEDemoWindow : EditorWindow
         window.titleContent = new GUIContent("NEDemoWindow");
         window.Show();
     }
+    private Texture t;
 
     void OnEnable()
     {
         m_cCanvas = new NECanvas();
         m_cLeftAreaStyle = new GUIStyle();
-        m_cLeftAreaStyle.border = new RectOffset(2, 2, 2, 2);
-
-        m_cLeftAreaStyle = new GUIStyle();
-        m_cLeftAreaStyle.border = new RectOffset(2, 2, 2, 2);
+       // m_cLeftAreaStyle.border = new RectOffset(2, 2, 2, 2);
+        t = EditorGUIUtility.Load("builtin skins/darkskin/images/node1.png") as Texture;
+        m_cLeftAreaStyle.normal.background = EditorGUIUtility.Load("builtin skins/darkskin/images/node1.png") as Texture2D;
+        Debug.Log(m_cLeftAreaStyle.normal.background);
+        m_cCenterAreaStyle = new GUIStyle();
+        m_cCenterAreaStyle.border = new RectOffset(2, 2, 2, 2);
 
         m_cRightAreaStyle = new GUIStyle();
         m_cRightAreaStyle.border = new RectOffset(2, 2, 2, 2);
@@ -43,7 +46,7 @@ public class NEDemoWindow : EditorWindow
     void OnGUI()
     {
         EditorGUILayout.BeginHorizontal(GUILayout.Height(position.height));
-        GUILayout.BeginArea(new Rect(0, 0, m_fSideAreaWidth, position.height));
+        GUILayout.BeginArea(new Rect(0, 0, m_fSideAreaWidth, position.height), m_cLeftAreaStyle);
         GUILayout.EndArea();
         float width = position.width - m_fSideAreaWidth;
         if (width < m_fSideAreaWidth) width = m_fSideAreaWidth;
