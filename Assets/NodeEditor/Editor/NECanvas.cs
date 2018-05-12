@@ -54,12 +54,12 @@ namespace NodeEditor
             GUI.EndScrollView();
         }
 
-        public void CreateNode()
+        protected void CreateNode(object data)
         {
 
         }
 
-        public void CreateConnect(NENode inNode,NENode outNode)
+        protected void CreateConnect(NENode beginNode,NENode endNode)
         {
 
         }
