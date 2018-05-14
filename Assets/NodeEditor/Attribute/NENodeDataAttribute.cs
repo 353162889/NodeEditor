@@ -3,9 +3,12 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace Assets.NodeEditor.Attribute
+namespace NodeEditor
 {
-    class NENodeDataAttribute
+    /// <summary>
+    /// 标识为节点数据
+    /// </summary>
+    public class NENodeDataAttribute : Attribute
     {
     }
 }
