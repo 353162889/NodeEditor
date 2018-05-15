@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using UnityEditor;
 using UnityEngine;
@@ -18,7 +19,7 @@ namespace NodeEditor
         private GUIStyle m_cContentStyle;
         private GUIStyle m_cCloseStyle;
         private Texture2D m_cImg;
-        private float m_fImgWidth = 60;
+        private float m_fImgWidth = 40;
         private string m_sName;
         public string desc { get; private set; }
         private bool m_bShowInPoint;
@@ -27,7 +28,9 @@ namespace NodeEditor
         public bool isSelected { get { return m_bIsSelected; } }
         private bool m_bIsSelected;
 
+        public NENodePoint inPoint { get { return m_cInPoint; } }
         private NENodePoint m_cInPoint;
+        public NENodePoint outPoint { get { return m_cOutPoint; } }
         private NENodePoint m_cOutPoint;
 
         public NENode(Vector2 position,object node)
@@ -56,7 +59,7 @@ namespace NodeEditor
                 }
                 else
                 {
-                    var fieldInfos = type.GetFields();
+                    var fieldInfos = type.GetFields(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.FlattenHierarchy);
                     foreach (var item in fieldInfos)
                     {
                         if (item.GetCustomAttributes(typeof(NENodeDataAttribute), true).Length > 0)
@@ -82,15 +85,15 @@ namespace NodeEditor
             }
             m_cStyle = m_cNormalStyle;
             m_cContentStyle = new GUIStyle();
-            m_cContentStyle.fontSize = 16;
+            m_cContentStyle.fontSize = 14;
             m_cContentStyle.normal.textColor = Color.white;
             m_cContentStyle.alignment = TextAnchor.MiddleCenter;
 
 
-            float width = 120;
-            float height = 100;
+            float width = 100;
+            float height = 70;
             var descSize = m_cContentStyle.CalcSize(new GUIContent(m_sName));
-            width = Mathf.Max(descSize.x, width) + 20;
+            width = Mathf.Max(descSize.x, width) + 10;
             rect = new Rect(position.x - width / 2, position.y - height / 2, width, height);
 
             if (m_bShowInPoint)

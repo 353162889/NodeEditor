@@ -7,16 +7,21 @@ using UnityEngine;
 
 namespace BTCore
 {
-    [NENodeCategory("Decorator")]
-    public abstract class BTDecorator : BTNode
+    public class BTRootData
+    {
+    }
+    [NENode(typeof(BTRootData))]
+    [NENodeDisplay(false,true, false)]
+    [NEName("Root")]
+    public class BTRoot : BTNode
     {
         protected BTNode m_cChild;
 
         public override void AddChild(BTNode child)
         {
-            if(m_cChild != null)
+            if (m_cChild != null)
             {
-                Debug.LogError(this.GetType() + " has exist child node! add has override it");
+                Debug.LogError("BTRoot has exist child node! add has override it");
             }
             m_cChild = child;
         }
@@ -44,19 +49,8 @@ namespace BTCore
 
         sealed public override BTResult OnTick(BTBlackBoard blackBoard)
         {
-            BTResult result = OnEnter(blackBoard);
-            return Decorate(blackBoard, result);
-        }
-
-        public virtual BTResult OnEnter(BTBlackBoard blackBoard)
-        {
-            if (m_cChild == null) return BTResult.Success;
-            return m_cChild.OnTick(blackBoard);
-        }
-
-        public virtual BTResult Decorate(BTBlackBoard bloackBoard,BTResult result)
-        {
-            return result;
+            if (m_cChild != null)return m_cChild.OnTick(blackBoard);
+            return BTResult.Success;
         }
 
         public override void Clear()

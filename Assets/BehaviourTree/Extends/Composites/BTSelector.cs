@@ -1,14 +1,22 @@
-﻿using System;
+﻿using NodeEditor;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
 namespace BTCore
 {
+
+    public class BTSelectorData
+    {
+
+    }
+
+    [NENode(typeof(BTSelectorData))]
     public class BTSelector : BTRunningComposite
     {
         protected int m_iSelectedIndex;
-        public BTSelector() : base()
+        public BTSelector()
         {
             m_iSelectedIndex = 0;
         }

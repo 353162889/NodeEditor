@@ -1,26 +1,49 @@
-﻿using System;
+﻿using NodeEditor;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using UnityEngine;
 
 namespace BTCore
 {
+    public class BTNotConditionData
+    {
+
+    }
+    [NENode(typeof(BTNotConditionData))]
     public class BTNotCondition : BTCondition
     {
         protected BTCondition m_cChild;
-        public BTNotCondition(BTCondition child) : base()
+
+        public override void AddChild(BTNode child)
         {
-            m_cChild = child;
+            if (m_cChild != null)
+            {
+                Debug.LogError("BTDecorator has exist child node! add has override it");
+            }
+            if (child is BTCondition)
+            {
+                m_cChild = (BTCondition)child;
+            }
+            else
+            {
+                Debug.LogError("BTNotCondition AddChild is not BTCondition");
+            }
         }
 
         public override bool Evaluate(BTBlackBoard blackBoard)
         {
+            if (m_cChild == null) return true;
             return !m_cChild.Evaluate(blackBoard);
         }
 
         public override void Clear()
         {
-            m_cChild.Clear();
+            if (m_cChild != null)
+            {
+                m_cChild.Clear();
+            }
         }
     }
 }

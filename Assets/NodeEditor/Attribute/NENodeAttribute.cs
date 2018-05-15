@@ -10,8 +10,14 @@ namespace NodeEditor
     /// </summary>
     public class NENodeAttribute : Attribute
     {
-        public NENodeAttribute()
+        public Type nodeDataType { get; private set; }
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="nodeDataType">关联的节点数据类型</param>
+        public NENodeAttribute(Type nodeDataType)
         {
+            this.nodeDataType = nodeDataType;
         }
     }
 }

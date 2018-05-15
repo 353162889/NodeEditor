@@ -1,14 +1,20 @@
-﻿using System;
+﻿using NodeEditor;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
 namespace BTCore
 {
+    public class BTSequenceData
+    {
+
+    }
+    [NENode(typeof(BTSequenceData))]
     public class BTSequence : BTRunningComposite
     {
         protected int m_iSelectedIndex;
-        public BTSequence():base()
+        public BTSequence()
         {
             m_iSelectedIndex = 0;
         }

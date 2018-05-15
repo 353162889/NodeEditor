@@ -11,15 +11,14 @@ namespace NodeEditor
         enum1,
         enum2
     }
-    [NENode]
     [NENodeCategory("test1")]
     [NENodeData]
     public class TestNodeData
     {
         [NEName("这是一个测试")]
         public int aa = 2;
-        public float bb1;
-        public string cc;
+        private float bb1;
+        protected string cc;
         public bool asd1;
         public Vector2 v2;
         public Vector3 v31111;
@@ -31,7 +30,6 @@ namespace NodeEditor
         public TestEnum[] arrEnum;
         public Vector2[] arrVector2;
     }
-    [NENode]
     [NENodeCategory("test2")]
     [NENodeData]
     public class TestNodeData1
@@ -51,7 +49,6 @@ namespace NodeEditor
         public TestEnum[] arrEnum;
         public Vector2[] arrVector2;
     }
-    [NENode]
     [NENodeDisplay(false,true,false)]
     public class TestNodeData2
     {

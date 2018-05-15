@@ -1,20 +1,35 @@
-﻿using System;
+﻿using NodeEditor;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using UnityEngine;
 
 namespace BTCore
 {
+    public class BTAndConditionData
+    {
+
+    }
+    [NENode(typeof(BTAndConditionData))]
     public class BTAndCondition : BTCondition
     {
         private List<BTCondition> m_lstCondition;
-        public BTAndCondition() : base() {
+        public BTAndCondition()
+        {
             m_lstCondition = new List<BTCondition>();
         }
 
-        public void AddChild(BTCondition child)
+        public override void AddChild(BTNode child)
         {
-            m_lstCondition.Add(child);
+            if (child is BTCondition)
+            {
+                m_lstCondition.Add((BTCondition)child);
+            }
+            else
+            {
+                Debug.LogError("BTAndCondition AddChild is not BTCondition");
+            }
         }
 
         public override bool Evaluate(BTBlackBoard blackBoard)

@@ -5,13 +5,9 @@ using System.Text;
 
 namespace BTCore
 {
-    public class BTRunningComposite : BTComposite
+    public abstract class BTRunningComposite : BTComposite
     {
         protected BTNode m_cRunningChild;
-
-        public BTRunningComposite() : base()
-        {
-        }
 
         //可重写
         protected virtual BTResult OnCompositeTick(BTBlackBoard blackBoard)

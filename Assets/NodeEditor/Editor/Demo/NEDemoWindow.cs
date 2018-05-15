@@ -30,13 +30,13 @@ namespace NodeEditor
             var lstTypes = assembly.GetTypes();
             for (int i = 0; i < lstTypes.Length; i++)
             {
-                var arr = lstTypes[i].GetCustomAttributes(typeof(NENodeAttribute), false);
+                var arr = lstTypes[i].GetCustomAttributes(typeof(NENodeAttribute), true);
                 if(arr.Length > 0)
                 {
                     types.Add(lstTypes[i]);
                 }
             }
-            m_cCanvas = new NECanvas(types);
+            m_cCanvas = new NECanvas(types, CreateNodeData);
             m_cToolBarStyle = null;
 
             m_cLeftAreaStyle = new GUIStyle();
@@ -47,6 +47,12 @@ namespace NodeEditor
 
             m_cRightAreaStyle = new GUIStyle();
             m_cRightAreaStyle.border = new RectOffset(2, 2, 2, 2);
+        }
+
+        object CreateNodeData(Type type)
+        {
+            object data = Activator.CreateInstance(type);
+            return data;    
         }
 
         void OnDisable()

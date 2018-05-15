@@ -1,10 +1,16 @@
-﻿using System;
+﻿using NodeEditor;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
 namespace BTCore
-{ 
+{
+    public class BTParallelAndData
+    {
+    }
+
+    [NENode(typeof(BTParallelAndData))]
     /// <summary>
     /// 并行与，需要所有子对象都运行完成才返回
     /// </summary>
@@ -12,7 +18,8 @@ namespace BTCore
     {
         protected List<BTResult> m_lstResults;
         protected int m_iCount;
-        public BTParallelAnd() : base() {
+        public BTParallelAnd()
+        {
             m_lstResults = new List<BTResult>();
             m_iCount = 0;
         }

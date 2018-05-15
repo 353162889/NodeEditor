@@ -1,19 +1,21 @@
-﻿using System;
+﻿using NodeEditor;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
 namespace BTCore
 {
+    public class BTParallelORData
+    {
+
+    }
+    [NENode(typeof(BTParallelORData))]
     /// <summary>
     /// 并行或，只要有一个不在运行中，那么返回结果
     /// </summary>
     public class BTParallelOR : BTComposite
     {
-        public BTParallelOR() : base()
-        {
-        }
-
         public override BTResult OnTick(BTBlackBoard blackBoard)
         {
             int count = m_lstChild.Count;
@@ -26,11 +28,6 @@ namespace BTCore
                 }
             }
             return BTResult.Running;
-        }
-
-        public override void Clear()
-        {
-            base.Clear();
         }
     }
 }

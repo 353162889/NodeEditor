@@ -196,7 +196,7 @@ namespace NodeEditor
         public static NEDataProperty[] GetProperties(System.Object obj)
         {
             List<NEDataProperty> properties = new List<NEDataProperty>();
-            FieldInfo[] infos = obj.GetType().GetFields();
+            FieldInfo[] infos = obj.GetType().GetFields(BindingFlags.Public | BindingFlags.Instance);
             foreach (FieldInfo info in infos)
             {
                 NEDatapRropertyType type = NEDatapRropertyType.Integer;

@@ -1,4 +1,5 @@
-﻿using System;
+﻿using NodeEditor;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -10,12 +11,13 @@ namespace BTCore
         Ready,
         Running,
     }
-    public class BTAction : BTNode
+    [NENodeCategory("Action")]
+    public abstract class BTAction : BTNode
     {
         protected BTActionResult m_eActionResult;
         protected bool m_bIsEnd;
         protected BTBlackBoard m_cBlackBoard;
-        public BTAction() : base()
+        public BTAction()
         {
             m_eActionResult = BTActionResult.Ready;
         }

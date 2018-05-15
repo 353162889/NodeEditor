@@ -10,9 +10,9 @@ namespace NodeEditor
 {
     public class NECanvas
     {
-        private Vector2 scrollPos;
+        public Vector2 scrollPos { get; set; }
         private Rect m_sPosition;
-        private Rect m_sScrollViewRect = new Rect(0, 0, 10000, 10000);
+        public Rect scrollViewRect = new Rect(0, 0, 10000, 10000);
         private List<NENode> m_lstNode = new List<NENode>();
         public List<NENode> lstNode { get { return m_lstNode; } }
         private List<NEConnection> m_lstConnection = new List<NEConnection>();
@@ -23,11 +23,12 @@ namespace NodeEditor
         private NENodePoint m_cInNodePoint;
         private NENodePoint m_cOutNodePoint;
         private Dictionary<string, List<Type>> m_dicNodeType;
+        private Func<Type, object> m_fCreateNodeFunc;
 
-        public NECanvas(List<Type> lstNodeType)
+        public NECanvas(List<Type> lstNodeType,Func<Type,object> createNodeDataFunc)
         {
+            m_fCreateNodeFunc = createNodeDataFunc;
             m_dicNodeType = new Dictionary<string, List<Type>>();
-            m_dicNodeType.Add("", new List<Type>());
             if (lstNodeType != null)
             {
                 for (int i = 0; i < lstNodeType.Count; i++)
@@ -45,12 +46,16 @@ namespace NodeEditor
                     }
                     else
                     {
-                        lst = m_dicNodeType[""];
+                        if(!m_dicNodeType.TryGetValue("", out lst))
+                        {
+                            lst = new List<Type>();
+                            m_dicNodeType.Add("", lst);
+                        }
                     }
                     lst.Add(lstNodeType[i]);
                 }
             }
-            scrollPos = new Vector2(m_sScrollViewRect.width / 2f, m_sScrollViewRect.height / 2f);
+            scrollPos = new Vector2(scrollViewRect.width / 2f, scrollViewRect.height / 2f);
             m_cSelectedNode = null;
             m_cDragNode = null;
             m_cInNodePoint = null;
@@ -61,7 +66,7 @@ namespace NodeEditor
         {
             m_sPosition = position;
             Rect rect = new Rect(0, 0, position.width, position.height);
-            scrollPos = GUI.BeginScrollView(rect, scrollPos, m_sScrollViewRect, true, true);
+            scrollPos = GUI.BeginScrollView(rect, scrollPos, scrollViewRect, true, true);
             DrawGrid();
             DrawNodes();
             DrawConnections();
@@ -70,13 +75,21 @@ namespace NodeEditor
             GUI.EndScrollView();
         }
 
-        protected NENode CreateNode(object data)
+        public NENode CreateNode(Vector2 pos, object data)
         {
-            return null;
+            NENode node = new NENode(pos, data);
+            m_lstNode.Add(node);
+            return node;
         }
 
-        protected NEConnection CreateConnect(NENode beginNode,NENode endNode)
+        public NEConnection CreateConnect(NENode beginNode,NENode endNode)
         {
+            if (beginNode.outPoint != null && endNode.inPoint != null)
+            {
+                NEConnection connection = new NEConnection(endNode.inPoint,beginNode.outPoint);
+                m_lstConnection.Add(connection);
+                return connection;
+            }
             return null;
         }
 
@@ -295,12 +308,15 @@ namespace NodeEditor
                 }
                 for (int i = 0; i < item.Value.Count; i++)
                 {
-                    Type type = item.Value[i];
-                    string name = pre + type.Name;
-                    menu.AddItem(new GUIContent(name), false, (object obj) => {
-                        object data = Activator.CreateInstance((Type)obj);
-                        m_lstNode.Add(new NENode(mousePosition,data));
-                    },type);
+                    Type nodeType = item.Value[i];
+                    string name = pre + nodeType.Name;
+                    menu.AddItem(new GUIContent(name), false, () => {
+                        if (m_fCreateNodeFunc != null)
+                        {
+                            object data = m_fCreateNodeFunc.Invoke(nodeType);
+                            CreateNode(mousePosition, data);
+                        }
+                    });
                 }
                 if(count > 1)
                 {
@@ -326,18 +342,18 @@ namespace NodeEditor
 
         private void DrawGrid(float gridSpacing, Color gridColor)
         {
-            int column = Mathf.CeilToInt(m_sScrollViewRect.height / gridSpacing);
-            int row = Mathf.CeilToInt(m_sScrollViewRect.width / gridSpacing);
+            int column = Mathf.CeilToInt(scrollViewRect.height / gridSpacing);
+            int row = Mathf.CeilToInt(scrollViewRect.width / gridSpacing);
             Handles.BeginGUI();
             Color oldColor = Handles.color;
             Handles.color = gridColor;
             for (int i = 0; i < column; i++)
             {
-                Handles.DrawLine(new Vector3(0, i * gridSpacing, 0), new Vector3(m_sScrollViewRect.width, i * gridSpacing, 0));
+                Handles.DrawLine(new Vector3(0, i * gridSpacing, 0), new Vector3(scrollViewRect.width, i * gridSpacing, 0));
             }
             for (int i = 0; i < row; i++)
             {
-                Handles.DrawLine(new Vector3(i * gridSpacing, 0, 0), new Vector3(i * gridSpacing, m_sScrollViewRect.height, 0));
+                Handles.DrawLine(new Vector3(i * gridSpacing, 0, 0), new Vector3(i * gridSpacing, scrollViewRect.height, 0));
             }
             Handles.color = oldColor;
             Handles.EndGUI();
@@ -347,6 +363,7 @@ namespace NodeEditor
         {
             m_lstNode.Clear();
             m_lstConnection.Clear();
+            m_fCreateNodeFunc = null;
         }
     }
 }
