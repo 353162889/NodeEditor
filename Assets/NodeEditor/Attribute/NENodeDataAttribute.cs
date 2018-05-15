@@ -10,5 +10,9 @@ namespace NodeEditor
     /// </summary>
     public class NENodeDataAttribute : Attribute
     {
+        public NENodeDataAttribute()
+        {
+           
+        }
     }
 }

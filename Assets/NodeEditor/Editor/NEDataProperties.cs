@@ -249,14 +249,7 @@ namespace NodeEditor
             m_Info = info;
             m_Type = propertyType;
             //m_sName = ObjectNames.NicifyVariableName(m_Info.Name);
-            m_sName = m_Info.Name;
-            var arr = info.GetCustomAttributes(typeof(NEDataDescAttribute), false);
-            if(arr != null && arr.Length > 0)
-            {
-                string desc = ((NEDataDescAttribute)arr[0]).desc;
-                if (!string.IsNullOrEmpty(desc))
-                    m_sName = desc;
-            }
+            m_sName = NENameAttribute.GetName(m_Info);
             if (propertyType == NEDatapRropertyType.Array)
             {
                 isShow = false;

@@ -14,31 +14,47 @@ namespace NodeEditor
         private Rect m_sPosition;
         private Rect m_sScrollViewRect = new Rect(0, 0, 10000, 10000);
         private List<NENode> m_lstNode = new List<NENode>();
+        public List<NENode> lstNode { get { return m_lstNode; } }
         private List<NEConnection> m_lstConnection = new List<NEConnection>();
+        public List<NEConnection> lstConnection { get { return m_lstConnection; } }
         private NENode m_cSelectedNode;
+        public NENode selectNode { get { return m_cSelectedNode; } }
         private NENode m_cDragNode;
         private NENodePoint m_cInNodePoint;
         private NENodePoint m_cOutNodePoint;
+        private Dictionary<string, List<Type>> m_dicNodeType;
 
-        public NECanvas()
+        public NECanvas(List<Type> lstNodeType)
         {
+            m_dicNodeType = new Dictionary<string, List<Type>>();
+            m_dicNodeType.Add("", new List<Type>());
+            if (lstNodeType != null)
+            {
+                for (int i = 0; i < lstNodeType.Count; i++)
+                {
+                    List<Type> lst = null;
+                    var attributes = lstNodeType[i].GetCustomAttributes(typeof(NENodeCategoryAttribute), true);
+                    if(attributes.Length > 0)
+                    {
+                        string category = ((NENodeCategoryAttribute)attributes[0]).category;
+                        if(!m_dicNodeType.TryGetValue(category, out lst))
+                        {
+                            lst = new List<Type>();
+                            m_dicNodeType.Add(category, lst);
+                        }
+                    }
+                    else
+                    {
+                        lst = m_dicNodeType[""];
+                    }
+                    lst.Add(lstNodeType[i]);
+                }
+            }
             scrollPos = new Vector2(m_sScrollViewRect.width / 2f, m_sScrollViewRect.height / 2f);
             m_cSelectedNode = null;
             m_cDragNode = null;
             m_cInNodePoint = null;
             m_cOutNodePoint = null;
-            //LoadNodes(nodeAttribute);
-        }
-
-        private void LoadNodes()
-        {
-            //Assembly assembly = typeof(NECanvas).Assembly;
-            //var lst = assembly.GetTypes();
-            //foreach (var item in lst)
-            //{
-            //    object[] arrAttrs = item.GetCustomAttributes(nodeAttribute, false);
-            //    if (0 == arrAttrs.Length) continue;
-            //}
         }
 
         public void Draw(Rect position)
@@ -54,14 +70,14 @@ namespace NodeEditor
             GUI.EndScrollView();
         }
 
-        protected void CreateNode(object data)
+        protected NENode CreateNode(object data)
         {
-
+            return null;
         }
 
-        protected void CreateConnect(NENode beginNode,NENode endNode)
+        protected NEConnection CreateConnect(NENode beginNode,NENode endNode)
         {
-
+            return null;
         }
 
         private void DrawNodes()
@@ -116,6 +132,8 @@ namespace NodeEditor
 
         private void OnClickNodeRemove(NENode node)
         {
+            if (m_cDragNode == node) m_cDragNode = null;
+            if (m_cSelectedNode == node) m_cSelectedNode = null;
             m_lstNode.Remove(node);
             for (int i = m_lstConnection.Count - 1; i > -1; i--)
             {
@@ -200,6 +218,7 @@ namespace NodeEditor
                     case EventType.MouseDrag:
                         if (isInWindow && null != m_cDragNode)
                         {
+                            //m_cDragNode.MovePosition(e.delta);
                             m_cDragNode.SetPosition(e.mousePosition);
                             e.Use();
                             GUI.changed = true;
@@ -266,15 +285,37 @@ namespace NodeEditor
         private void HandleBlankMenu(Vector2 mousePosition)
         {
             GenericMenu menu = new GenericMenu();
-            menu.AddItem(new GUIContent("测试"), false, () => { m_lstNode.Add(new NENode(mousePosition)); });
+            int count = m_dicNodeType.Count;
+            foreach (var item in m_dicNodeType)
+            {
+                string pre = "";
+                if(!string.IsNullOrEmpty(item.Key))
+                {
+                    pre += item.Key + "/";
+                }
+                for (int i = 0; i < item.Value.Count; i++)
+                {
+                    Type type = item.Value[i];
+                    string name = pre + type.Name;
+                    menu.AddItem(new GUIContent(name), false, (object obj) => {
+                        object data = Activator.CreateInstance((Type)obj);
+                        m_lstNode.Add(new NENode(mousePosition,data));
+                    },type);
+                }
+                if(count > 1)
+                {
+                    menu.AddSeparator("");
+                }
+                count--;
+            }
             menu.ShowAsContext();
         }
 
         private void HandleNodeMenu(NENode node, Vector2 mousePosition)
         {
-            GenericMenu menu = new GenericMenu();
-            menu.AddItem(new GUIContent("删除节点"), false, () => { m_lstNode.Remove(node); });
-            menu.ShowAsContext();
+            //GenericMenu menu = new GenericMenu();
+            //menu.AddItem(new GUIContent("删除节点"), false, () => { m_lstNode.Remove(node); });
+            //menu.ShowAsContext();
         }
 
         private void DrawGrid()
