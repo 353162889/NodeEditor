@@ -13,11 +13,13 @@ public class BehaviourTreeWindow : EditorWindow
     private static float titleHeight = 20;
     private static float leftAreaWidth = 200;
     private static float rightAreaWidth = 200;
+
     public NECanvas canvas { get { return m_cCanvas; } }
     private NECanvas m_cCanvas;
     private List<Type> m_lstNodeType;
     private List<Type> m_lstNodeDataType;
-    private GUIStyle m_cToolBarStyle;
+    private GUIStyle m_cToolBarBtnStyle;
+    private GUIStyle m_cToolBarPopupStyle;
 
     private NENode m_cRoot;
 
@@ -53,7 +55,8 @@ public class BehaviourTreeWindow : EditorWindow
         }
         m_cCanvas = new NECanvas(m_lstNodeType, CreateNodeData);
         //这里设置位置会有些问题
-        m_cToolBarStyle = null;
+        m_cToolBarBtnStyle = null;
+        m_cToolBarPopupStyle = null;
         if(btData == null)
         {
             object data = CreateNodeData(typeof(BTRoot));
@@ -62,7 +65,7 @@ public class BehaviourTreeWindow : EditorWindow
         }
         else
         {
-            SetBTData(btData);
+            m_cRoot = CreateBTData(btData);
         }
     }
 
@@ -74,9 +77,20 @@ public class BehaviourTreeWindow : EditorWindow
         }
     }
 
-    private void SetBTData(BTData btData)
+    private NENode CreateBTData(BTData btData)
     {
+        if(btData.data == null)
+        {
+            Debug.LogError("btData.data == null");
+        }
+        if(btData.lstChild != null)
+        {
+            for (int i = 0; i < btData.lstChild.Count; i++)
+            {
 
+            }
+        }
+        return null;
     }
 
     private void LoadByAttribute(List<Type> types)
@@ -128,16 +142,22 @@ public class BehaviourTreeWindow : EditorWindow
     {
         m_cCanvas.Clear();
         m_cCanvas = null;
-        m_cToolBarStyle = null;
+        m_cToolBarBtnStyle = null;
+        m_cToolBarPopupStyle = null;
     }
 
     private int toolBarIndex = 0;
-    private Vector3 scrollPos;
+    private Vector3 leftScrollPos;
     void OnGUI()
     {
-        if (m_cToolBarStyle == null)
+        if (m_cToolBarBtnStyle == null)
         {
-            m_cToolBarStyle = new GUIStyle((GUIStyle)"toolbarbutton");
+            m_cToolBarBtnStyle = new GUIStyle((GUIStyle)"toolbarbutton");
+        }
+
+        if(m_cToolBarPopupStyle == null)
+        {
+            m_cToolBarPopupStyle = new GUIStyle((GUIStyle)"ToolbarPopup");
         }
         
         float centerAreaWidth = position.width - leftAreaWidth - rightAreaWidth;
@@ -146,8 +166,8 @@ public class BehaviourTreeWindow : EditorWindow
         //画布整体描述区域
         Rect leftArea = new Rect(0, titleHeight, leftAreaWidth, position.height - titleHeight);
         GUILayout.BeginArea(leftArea);
-        GUILayout.Label("总描述", m_cToolBarStyle, GUILayout.Width(leftArea.width));
-        scrollPos = GUILayout.BeginScrollView(scrollPos, false, true);
+        GUILayout.Label("总描述", m_cToolBarBtnStyle, GUILayout.Width(leftArea.width));
+        leftScrollPos = GUILayout.BeginScrollView(leftScrollPos, false, true);
         GUILayout.EndScrollView();
         GUILayout.EndArea();
 
@@ -161,7 +181,7 @@ public class BehaviourTreeWindow : EditorWindow
         //单个节点描述区域
         Rect rightArea = new Rect(leftArea.width + centerAreaWidth, titleHeight, rightAreaWidth, position.height - titleHeight);
         GUILayout.BeginArea(rightArea);
-        GUILayout.Label("节点描述", m_cToolBarStyle, GUILayout.Width(rightArea.width));
+        GUILayout.Label("节点描述", m_cToolBarBtnStyle, GUILayout.Width(rightArea.width));
         float oldLabelWidth = EditorGUIUtility.labelWidth;
         EditorGUIUtility.labelWidth = 50;
         if (m_cCanvas.selectNode != null && m_cCanvas.selectNode.dataProperty != null)
@@ -173,25 +193,27 @@ public class BehaviourTreeWindow : EditorWindow
 
         //标题区域
         Rect titleRect = new Rect(0, 0, position.width, titleHeight);
-        m_cToolBarStyle.fixedHeight = titleRect.height;
+        m_cToolBarBtnStyle.fixedHeight = titleRect.height;
+        m_cToolBarPopupStyle.fixedHeight = titleRect.height;
         GUILayout.BeginArea(titleRect);
         //GUILayout.Label("", tt,GUILayout.Width(50),GUILayout.Height(20));
         GUILayout.BeginHorizontal();
-        GUILayout.Label("", m_cToolBarStyle, GUILayout.Width(10));
-        if (GUILayout.Button("创建", m_cToolBarStyle, GUILayout.Width(100)))
+        GUILayout.Label("", m_cToolBarBtnStyle, GUILayout.Width(10));
+        if (GUILayout.Button("创建", m_cToolBarBtnStyle, GUILayout.Width(100)))
         {
             CreateData();
         }
-        if (GUILayout.Button("加载", m_cToolBarStyle, GUILayout.Width(100)))
+        if (GUILayout.Button("加载", m_cToolBarBtnStyle, GUILayout.Width(100)))
         {
             LoadData();
         }
-        if (GUILayout.Button("保存", m_cToolBarStyle, GUILayout.Width(100)))
+        if (GUILayout.Button("保存", m_cToolBarBtnStyle, GUILayout.Width(100)))
         {
             SaveData();
         }
-        GUILayout.Label("", m_cToolBarStyle, GUILayout.Width(position.width - 10 - 100 - 100 - 10));
-        GUILayout.Label("", m_cToolBarStyle, GUILayout.Width(10));
+        toolBarIndex = EditorGUILayout.Popup(toolBarIndex,new string[] { "tt"},m_cToolBarPopupStyle);
+        GUILayout.Label("", m_cToolBarBtnStyle, GUILayout.Width(position.width - 10 - 100 - 100 - 10));
+        GUILayout.Label("", m_cToolBarBtnStyle, GUILayout.Width(10));
         GUILayout.EndHorizontal();
         GUILayout.EndArea();
 
