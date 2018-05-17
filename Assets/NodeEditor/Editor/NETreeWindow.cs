@@ -25,7 +25,7 @@ namespace NodeEditor
 
         private NENode m_cRoot;
 
-        [MenuItem("Tools/NETree")]
+        [MenuItem("Tools/NETreeWindow")]
         static public void OpenWindow()
         {
             var window = EditorWindow.GetWindow<NETreeWindow>();
