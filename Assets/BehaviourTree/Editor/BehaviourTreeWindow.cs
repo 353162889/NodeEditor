@@ -237,6 +237,7 @@ public class BehaviourTreeWindow : EditorWindow
 
     private int toolBarIndex = 0;
     private Vector3 leftScrollPos;
+    private Vector3 rightScrollPos;
     void OnGUI()
     {
         if (m_cToolBarBtnStyle == null)
@@ -261,7 +262,6 @@ public class BehaviourTreeWindow : EditorWindow
         GUILayout.EndArea();
 
         //画布区域
-
         Rect centerArea = new Rect(leftArea.width, titleHeight, centerAreaWidth, position.height - titleHeight);
         GUILayout.BeginArea(centerArea);
         m_cCanvas.Draw(centerArea);
@@ -271,13 +271,27 @@ public class BehaviourTreeWindow : EditorWindow
         Rect rightArea = new Rect(leftArea.width + centerAreaWidth, titleHeight, rightAreaWidth, position.height - titleHeight);
         GUILayout.BeginArea(rightArea);
         GUILayout.Label("节点描述", m_cToolBarBtnStyle, GUILayout.Width(rightArea.width));
+        rightScrollPos = GUILayout.BeginScrollView(rightScrollPos, false, true);
         float oldLabelWidth = EditorGUIUtility.labelWidth;
-        EditorGUIUtility.labelWidth = 50;
         if (m_cCanvas.selectNode != null && m_cCanvas.selectNode.dataProperty != null)
         {
+            if (!string.IsNullOrEmpty(m_cCanvas.selectNode.desc))
+            {
+                EditorGUILayout.BeginHorizontal();
+                EditorGUILayout.LabelField("节点描述:");
+                EditorGUILayout.EndHorizontal();
+                EditorGUILayout.BeginHorizontal();
+                bool oldWordWrap = EditorStyles.textArea.wordWrap;
+                EditorStyles.textArea.wordWrap = true;
+                GUILayout.TextArea(m_cCanvas.selectNode.desc, GUILayout.Width(rightArea.width - 40), GUILayout.Height(60));
+                EditorStyles.textArea.wordWrap = oldWordWrap;
+                EditorGUILayout.EndHorizontal();
+            }
+            EditorGUIUtility.labelWidth = 50;
             NEDataProperties.Draw(m_cCanvas.selectNode.dataProperty, GUILayout.Width(rightArea.width - 50));
         }
         EditorGUIUtility.labelWidth = oldLabelWidth;
+        GUILayout.EndScrollView();
         GUILayout.EndArea();
 
         //标题区域

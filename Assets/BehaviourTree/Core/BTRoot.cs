@@ -12,7 +12,7 @@ namespace BTCore
     }
     [NENode(typeof(BTRootData))]
     [NENodeDisplay(false, true, false)]
-    [NEName("Root")]
+    [NENodeName("Root")]
     public class BTRoot : BTNode
     {
         protected BTNode m_cChild;

@@ -15,7 +15,7 @@ namespace NodeEditor
     [NENodeData]
     public class TestNodeData
     {
-        [NEName("这是一个测试")]
+        [NEProperty("这是一个测试")]
         public int aa = 2;
         private float bb1;
         protected string cc;
@@ -26,7 +26,7 @@ namespace NodeEditor
         public int[] arrInt;
         public bool[] arrBool;
         public float[] arrFloat;
-        [NEName("这是一个测试1")]
+        [NEProperty("这是一个测试1")]
         public TestEnum[] arrEnum;
         public Vector2[] arrVector2;
     }
@@ -34,7 +34,7 @@ namespace NodeEditor
     [NENodeData]
     public class TestNodeData1
     {
-        [NEName("这是一个测试")]
+        [NEProperty("这是一个测试")]
         public int aa;
         public float bb1;
         public string cc;
@@ -45,14 +45,14 @@ namespace NodeEditor
         public int[] arrInt;
         public bool[] arrBool;
         public float[] arrFloat;
-        [NEName("这是一个测试1")]
+        [NEProperty("这是一个测试1")]
         public TestEnum[] arrEnum;
         public Vector2[] arrVector2;
     }
     [NENodeDisplay(false,true,false)]
     public class TestNodeData2
     {
-        [NEName("这是一个测试")]
+        [NEProperty("这是一个测试")]
         public int aa;
         public float bb1;
         public string cc;
@@ -63,7 +63,7 @@ namespace NodeEditor
         public int[] arrInt;
         public bool[] arrBool;
         public float[] arrFloat;
-        [NEName("这是一个测试1")]
+        [NEProperty("这是一个测试1")]
         public TestEnum[] arrEnum;
         public Vector2[] arrVector2;
         [NENodeData]

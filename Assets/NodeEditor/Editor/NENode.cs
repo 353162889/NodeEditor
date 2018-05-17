@@ -11,12 +11,16 @@ namespace NodeEditor
     public class NENode
     {
         public Rect rect;
+        private Vector2 normalSize = Vector2.zero;
+        private Vector2 extendSize = Vector2.zero;
         public object node { get; private set; }
         public NEDataProperty[] dataProperty { get; private set; }
+        private List<NEDataProperty> m_lstShowOnNodeProperty;
         private GUIStyle m_cNormalStyle;
         private GUIStyle m_cSelectStyle;
         private GUIStyle m_cStyle;
         private GUIStyle m_cContentStyle;
+        private GUIStyle m_cExtendStyle;
         private GUIStyle m_cCloseStyle;
         private Texture2D m_cImg;
         private float m_fImgWidth = 40;
@@ -49,8 +53,8 @@ namespace NodeEditor
             if (this.node != null)
             {
                 var type = this.node.GetType();
-                m_sName = NENameAttribute.GetName(type);
-                desc = NEDescAttribute.GetDesc(type);
+                m_sName = NENodeNameAttribute.GetName(type);
+                desc = NENodeDescAttribute.GetDesc(type);
                 var attributes = type.GetCustomAttributes(typeof(NENodeDataAttribute), true);
                 object nodeData = null;
                 if(attributes.Length > 0)
@@ -72,6 +76,7 @@ namespace NodeEditor
                 if(nodeData != null)
                 {
                     dataProperty = NEDataProperties.GetProperties(nodeData);
+                   
                 }
 
                 attributes = type.GetCustomAttributes(typeof(NENodeDisplayAttribute), true);
@@ -88,13 +93,36 @@ namespace NodeEditor
             m_cContentStyle.fontSize = 14;
             m_cContentStyle.normal.textColor = Color.white;
             m_cContentStyle.alignment = TextAnchor.MiddleCenter;
-
+            m_cExtendStyle = new GUIStyle();
+            m_cExtendStyle.fontSize = 10;
+            m_cExtendStyle.normal.textColor = Color.white;
+            m_cExtendStyle.alignment = TextAnchor.MiddleCenter;
 
             float width = 100;
             float height = 70;
             var descSize = m_cContentStyle.CalcSize(new GUIContent(m_sName));
-            width = Mathf.Max(descSize.x, width) + 10;
-            rect = new Rect(position.x - width / 2, position.y - height / 2, width, height);
+            width = Mathf.Max(descSize.x, width);
+            normalSize = new Vector2(width,height);
+
+            extendSize = Vector2.zero;
+            m_lstShowOnNodeProperty = new List<NEDataProperty>();
+            if (dataProperty != null)
+            {
+                for (int i = 0; i < dataProperty.Length; i++)
+                {
+                    if (dataProperty[i].showOnNode)
+                    {
+                        var extSize = m_cExtendStyle.CalcSize(new GUIContent(dataProperty[i].Name + ":" +dataProperty[i].GetValue().ToString()));
+                        if (extSize.x > extendSize.x) extendSize.x = extSize.x;
+                        extendSize.y += extSize.y;
+                        m_lstShowOnNodeProperty.Add(dataProperty[i]);
+                    }
+                }
+            }
+            if (extendSize.y > 0) extendSize.y += 10;
+            float rectWidth = Mathf.Max(normalSize.x, extendSize.x) + 10;
+            float rectHeight = normalSize.y + extendSize.y;
+            rect = new Rect(position.x - width / 2, position.y - height / 2, rectWidth, rectHeight);
 
             if (m_bShowInPoint)
             {
@@ -104,6 +132,8 @@ namespace NodeEditor
             {
                 m_cOutPoint = new NENodePoint(this, NENodePointType.Out);
             }
+
+            
         }
 
         public virtual void Draw(Action<NENode> onClickRemoveNode, Action<NENodePoint> onClickNodePoint)
@@ -134,6 +164,7 @@ namespace NodeEditor
             {
                 m_cOutPoint.Draw(onClickNodePoint);
             }
+            
             GUILayout.BeginArea(rect, m_cStyle);
             if (m_cImg != null)
             {
@@ -141,7 +172,19 @@ namespace NodeEditor
             }
             if (!string.IsNullOrEmpty(m_sName))
             {
-                GUI.Label(new Rect(0, m_fImgWidth + 4, rect.width, rect.height - m_fImgWidth - 4), m_sName, m_cContentStyle);
+                GUI.Label(new Rect(0, m_fImgWidth + 4, rect.width, normalSize.y - m_fImgWidth - 4), m_sName, m_cContentStyle);
+            }
+            if(m_lstShowOnNodeProperty.Count > 0)
+            {
+                GUILayout.BeginArea(new Rect(0, normalSize.y, rect.width, extendSize.y));
+                for (int i = 0; i < m_lstShowOnNodeProperty.Count; i++)
+                {
+                    string desc = m_lstShowOnNodeProperty[i].Name + ":" + m_lstShowOnNodeProperty[i].GetValue().ToString();
+                    GUILayout.BeginHorizontal();
+                    GUILayout.Label(desc, m_cExtendStyle);
+                    GUILayout.EndHorizontal();
+                }
+                GUILayout.EndArea();
             }
             GUILayout.EndArea();
             float closeWidth = m_cCloseStyle.normal.background.width;

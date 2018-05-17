@@ -243,13 +243,24 @@ namespace NodeEditor
             get { return m_sName; }
         }
 
+        private bool m_bShowOnNode;
+        public bool showOnNode { get { return m_bShowOnNode; } }
+
         public NEDataProperty(System.Object instance, FieldInfo info, NEDatapRropertyType propertyType)
         {
             m_Instance = instance;
             m_Info = info;
             m_Type = propertyType;
             //m_sName = ObjectNames.NicifyVariableName(m_Info.Name);
-            m_sName = NENameAttribute.GetName(m_Info);
+            m_sName = m_Info.Name;
+            m_bShowOnNode = false;
+            var arr = m_Info.GetCustomAttributes(typeof(NEPropertyAttribute), false);
+            if (arr.Length > 0)
+            {
+                NEPropertyAttribute propertyAttr= (NEPropertyAttribute)arr[0];
+                m_sName = propertyAttr.name;
+                m_bShowOnNode = propertyAttr.showOnNode;
+            }
             if (propertyType == NEDatapRropertyType.Array)
             {
                 isShow = false;
