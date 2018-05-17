@@ -4,11 +4,11 @@ using System.Text;
 using System.Xml.Serialization;
 using UnityEngine;
 
-namespace NodeEditor
+namespace BTCore
 {
-    public class NEUtil
+    public class BTUtil
     {
-        public static object DeSerializerObject(string path, Type type)
+        public static object DeSerializerObject(string path, Type type,Type[] extraTypes = null)
         {
             object obj = null;
             if (!File.Exists(path))
@@ -28,7 +28,15 @@ namespace NodeEditor
                 {
                     if (streamFile != null)
                     {
-                        XmlSerializer xs = new XmlSerializer(type);
+                        XmlSerializer xs = null;
+                        if (extraTypes == null)
+                        {
+                            xs = new XmlSerializer(type);
+                        }
+                        else
+                        {
+                            xs = new XmlSerializer(type, extraTypes);
+                        }
                         obj = xs.Deserialize(streamFile);
                     }
                 }
@@ -41,14 +49,23 @@ namespace NodeEditor
             return obj;
         }
 
-        public static object DeSerializerObjectFromBuff(byte[] buff, Type type)
+        public static object DeSerializerObjectFromBuff(byte[] buff, Type type, Type[] extraTypes = null)
         {
             object objRet = null;
             using (MemoryStream stream = new MemoryStream(buff))
             {
                 try
                 {
-                    XmlSerializer xs = new XmlSerializer(type);
+                    XmlSerializer xs = null;
+                    if (extraTypes == null)
+                    {
+                        xs = new XmlSerializer(type);
+                    }
+                    else
+                    {
+                        xs = new XmlSerializer(type,extraTypes);
+                    }
+                  
                     objRet = xs.Deserialize(stream);
                 }
                 catch (System.Exception ex)
@@ -60,7 +77,7 @@ namespace NodeEditor
             return objRet;
         }
 
-        public static void SerializerObject(string path, object obj)
+        public static void SerializerObject(string path, object obj,Type[] extraTypes = null)
         {
             if (File.Exists(path))
             { // remove exist file to fix unexcept text
@@ -96,8 +113,15 @@ namespace NodeEditor
                     {
                         Directory.CreateDirectory(strDirectory);
                     }
-
-                    XmlSerializer xs = new XmlSerializer(obj.GetType());
+                    XmlSerializer xs = null; ;
+                    if (extraTypes != null)
+                    {
+                        xs = new XmlSerializer(obj.GetType(), extraTypes);
+                    }
+                    else
+                    {
+                        xs = new XmlSerializer(obj.GetType());
+                    }
                     TextWriter writer = new StreamWriter(streamFile, Encoding.UTF8);
                     xs.Serialize(writer, obj);
                 }

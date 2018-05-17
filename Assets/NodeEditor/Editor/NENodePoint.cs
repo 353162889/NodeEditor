@@ -24,16 +24,20 @@ namespace NodeEditor
             this.node = node;
             this.pointType = pointType;
             this.rect = new Rect(0, 0, 40, 16);
-            m_cBtnStyle = (GUIStyle)"AppToolbar";
+            m_cBtnStyle = null;
         }
 
         public void Draw(Action<NENodePoint> onClickPoint)
         {
+            if (m_cBtnStyle == null)
+            {
+                m_cBtnStyle = new GUIStyle((GUIStyle)"AppToolbar");
+            }
             rect.x = node.rect.x + (node.rect.width - rect.width) / 2;
             switch (pointType)
             {
                 case NENodePointType.In:
-                    rect.y = node.rect.yMin - rect.height;
+                    rect.y = node.rect.yMin - rect.height; 
                     break;
                 case NENodePointType.Out:
                     rect.y = node.rect.yMax;

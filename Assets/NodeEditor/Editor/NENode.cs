@@ -36,10 +36,10 @@ namespace NodeEditor
         public NENode(Vector2 position,object node)
         {
             this.node = node;
-            m_cNormalStyle = new GUIStyle((GUIStyle)"flow node 0");
-            m_cSelectStyle = new GUIStyle((GUIStyle)"flow node 0 on");
-            m_cCloseStyle = new GUIStyle((GUIStyle)"TL SelectionBarCloseButton");
-            m_cImg = EditorGUIUtility.FindTexture("Favorite Icon");
+            m_cNormalStyle = null;
+            m_cSelectStyle = null;
+            m_cCloseStyle = null;
+            m_cImg = null;
 
             m_sName = "";
             desc = "";
@@ -108,6 +108,24 @@ namespace NodeEditor
 
         public virtual void Draw(Action<NENode> onClickRemoveNode, Action<NENodePoint> onClickNodePoint)
         {
+            if (m_cNormalStyle == null)
+            {
+                m_cNormalStyle = new GUIStyle((GUIStyle)"flow node 0");
+                m_cStyle = m_bIsSelected ? m_cSelectStyle : m_cNormalStyle; 
+            }
+            if (m_cSelectStyle == null)
+            {
+                m_cSelectStyle = new GUIStyle((GUIStyle)"flow node 0 on");
+                m_cStyle = m_bIsSelected ? m_cSelectStyle : m_cNormalStyle;
+            }
+            if (m_cCloseStyle == null)
+            {
+                m_cCloseStyle = new GUIStyle((GUIStyle)"TL SelectionBarCloseButton");
+            }
+            if (m_cImg == null)
+            {
+                m_cImg = EditorGUIUtility.FindTexture("Favorite Icon");
+            }
             if (m_cInPoint != null)
             {
                 m_cInPoint.Draw(onClickNodePoint);

@@ -7,15 +7,44 @@ using UnityEngine;
 using NodeEditor;
 using System.Reflection;
 using BTCore;
+using System.Xml.Serialization;
 
 public class BehaviourTreeWindow : EditorWindow
 {
+    public class BTTreeComposeType
+    {
+        public Type rootType { get; private set; }
+        public List<Type> lstNodeAttribute { get; private set; }
+        public string filePre { get; private set; }//前缀
+        public string fileExt { get; private set; }//后缀
+
+        public BTTreeComposeType(Type rootType,List<Type> lstNodeAttr,string filePre,string fileExt)
+        {
+            this.rootType = rootType;
+            this.lstNodeAttribute = lstNodeAttr;
+            this.filePre = filePre;
+            this.fileExt = fileExt;
+        }
+    }
     private static float titleHeight = 20;
     private static float leftAreaWidth = 200;
     private static float rightAreaWidth = 200;
 
     public NECanvas canvas { get { return m_cCanvas; } }
     private NECanvas m_cCanvas;
+
+    private BTTreeComposeType[] m_arrTreeComposeData = new BTTreeComposeType[] {
+        //一般数据
+        new BTTreeComposeType(typeof(BTRoot),new List<Type> { typeof(NENodeAttribute) },"",""),
+        new BTTreeComposeType(typeof(BTRoot1),new List<Type> { typeof(NENodeAttribute) },"",""),
+    };
+
+    private string[] m_sBTTreeComposeTypeDesc = new string[] {
+        "节点",
+        "节点1"
+    };
+    private int m_nTreeComposeIndex = 0;
+
     private List<Type> m_lstNodeType;
     private List<Type> m_lstNodeDataType;
     private GUIStyle m_cToolBarBtnStyle;
@@ -33,39 +62,57 @@ public class BehaviourTreeWindow : EditorWindow
         window.position = position;
        
         window.Show();
-        //之后设置位置
-        if (window.canvas != null)
-        {
-            float canvasWidth = window.position.width - leftAreaWidth - rightAreaWidth;
-            float canvasHeight = window.position.height - titleHeight;
-            Vector2 firstScrollPos = new Vector2((window.canvas.scrollViewRect.width - canvasWidth) / 2, (window.canvas.scrollViewRect.height - canvasHeight) / 2);
-            window.canvas.scrollPos = firstScrollPos;
-        }
+        window.FocusCanvasCenterPosition();
     }
 
     void OnEnable()
     {
-        LoadByAttribute(new List<Type> { typeof(NENodeAttribute) });
-        BTData btData = null;
-        if(m_cRoot != null)
-        {
-            var btNode = m_cRoot.node as BTNode;
-            btData = btNode.GetData();
-            m_cRoot = null;
-        }
-        m_cCanvas = new NECanvas(m_lstNodeType, CreateNodeData);
-        //这里设置位置会有些问题
         m_cToolBarBtnStyle = null;
         m_cToolBarPopupStyle = null;
-        if(btData == null)
+
+        Load(m_arrTreeComposeData[m_nTreeComposeIndex]);
+    }
+
+    private void Load(BTTreeComposeType containType)
+    {
+        BTData btData = null;
+        if (m_cRoot != null)
         {
-            object data = CreateNodeData(typeof(BTRoot));
-            Vector2 center = m_cCanvas.scrollViewRect.center;
-            m_cRoot = m_cCanvas.CreateNode(center, data);
+            foreach (var item in m_arrTreeComposeData)
+            {
+                if (item.rootType == m_cRoot.node.GetType())
+                {
+                    if(item == containType)
+                    {
+                        var btNode = m_cRoot.node as BTNode;
+                        btData = btNode.GetData();
+                    }
+                    break;
+                }
+            }
+            m_cRoot = null;
         }
-        else
+        LoadByAttribute(containType.rootType, containType.lstNodeAttribute);
+        
+        //移除根节点
+        List<Type> lst = new List<Type>();
+        for (int i = 0; i < m_lstNodeType.Count; i++)
         {
-            m_cRoot = CreateBTData(btData);
+            if (!IsRootType(m_lstNodeType[i])) lst.Add(m_lstNodeType[i]);
+        }
+        if (m_cCanvas != null) m_cCanvas.Dispose();
+        m_cCanvas = new NECanvas(lst, CreateNodeData);
+        CreateTree(btData);
+    }
+
+    public void FocusCanvasCenterPosition()
+    {
+        if (m_cCanvas != null)
+        {
+            float canvasWidth = position.width - leftAreaWidth - rightAreaWidth;
+            float canvasHeight = position.height - titleHeight;
+            Vector2 firstScrollPos = new Vector2((m_cCanvas.scrollViewRect.width - canvasWidth) / 2, (m_cCanvas.scrollViewRect.height - canvasHeight) / 2);
+            m_cCanvas.scrollPos = firstScrollPos;
         }
     }
 
@@ -75,6 +122,26 @@ public class BehaviourTreeWindow : EditorWindow
         {
             m_cCanvas.scrollPos = pos;
         }
+    }
+
+    private NENode CreateTree(BTData btData)
+    {
+        if (m_cCanvas != null) m_cCanvas.Clear();
+        NENode node = null;
+        if(btData == null)
+        {
+            var composeData = m_arrTreeComposeData[m_nTreeComposeIndex];
+            object data = CreateNodeData(composeData.rootType);
+            Vector2 center = m_cCanvas.scrollViewRect.center;
+            node = m_cCanvas.CreateNode(center, data);
+        }
+        else
+        {
+            node = CreateBTData(btData);
+        }
+        m_cRoot = node;
+        FocusCanvasCenterPosition();
+        return node;
     }
 
     private NENode CreateBTData(BTData btData)
@@ -93,7 +160,7 @@ public class BehaviourTreeWindow : EditorWindow
         return null;
     }
 
-    private void LoadByAttribute(List<Type> types)
+    private void LoadByAttribute(Type rootType, List<Type> types)
     {
         m_lstNodeType = new List<Type>();
         m_lstNodeDataType = new List<Type>();
@@ -103,7 +170,6 @@ public class BehaviourTreeWindow : EditorWindow
             var lstTypes = assembly.GetTypes();
             for (int j = 0; j < lstTypes.Length; j++)
             {
-                if (lstTypes[i] == typeof(BTRoot)) continue;
                 var arr = lstTypes[j].GetCustomAttributes(types[i], true);
                 if (arr.Length > 0)
                 {
@@ -113,6 +179,15 @@ public class BehaviourTreeWindow : EditorWindow
                 }
             }
         }
+    }
+
+    private bool IsRootType(Type type)
+    {
+        for (int i = 0; i < m_arrTreeComposeData.Length; i++)
+        {
+            if (type == m_arrTreeComposeData[i].rootType) return true;
+        }
+        return false;
     }
 
     private object CreateNodeData(Type type)
@@ -140,7 +215,7 @@ public class BehaviourTreeWindow : EditorWindow
 
     void OnDisable()
     {
-        m_cCanvas.Clear();
+        m_cCanvas.Dispose();
         m_cCanvas = null;
         m_cToolBarBtnStyle = null;
         m_cToolBarPopupStyle = null;
@@ -199,20 +274,16 @@ public class BehaviourTreeWindow : EditorWindow
         //GUILayout.Label("", tt,GUILayout.Width(50),GUILayout.Height(20));
         GUILayout.BeginHorizontal();
         GUILayout.Label("", m_cToolBarBtnStyle, GUILayout.Width(10));
-        if (GUILayout.Button("创建", m_cToolBarBtnStyle, GUILayout.Width(100)))
+        int oldTreeComposeIndex = m_nTreeComposeIndex;
+        m_nTreeComposeIndex = EditorGUILayout.Popup(m_nTreeComposeIndex, m_sBTTreeComposeTypeDesc, m_cToolBarPopupStyle,GUILayout.Width(100));
+        if(oldTreeComposeIndex != m_nTreeComposeIndex)
         {
-            CreateData();
+            Load(m_arrTreeComposeData[m_nTreeComposeIndex]);
         }
-        if (GUILayout.Button("加载", m_cToolBarBtnStyle, GUILayout.Width(100)))
-        {
-            LoadData();
-        }
-        if (GUILayout.Button("保存", m_cToolBarBtnStyle, GUILayout.Width(100)))
-        {
-            SaveData();
-        }
-        toolBarIndex = EditorGUILayout.Popup(toolBarIndex,new string[] { "tt"},m_cToolBarPopupStyle);
-        GUILayout.Label("", m_cToolBarBtnStyle, GUILayout.Width(position.width - 10 - 100 - 100 - 10));
+        GUILayout.Label("", m_cToolBarBtnStyle, GUILayout.Width(position.width - 10 - 100 - 50 - 50 - 50 - 10));
+        if (GUILayout.Button("创建", m_cToolBarBtnStyle, GUILayout.Width(50))) { CreateTree(null); }
+        if (GUILayout.Button("加载", m_cToolBarBtnStyle, GUILayout.Width(50))) { LoadTree(); }
+        if (GUILayout.Button("保存", m_cToolBarBtnStyle, GUILayout.Width(50))) { SaveTree(); }
         GUILayout.Label("", m_cToolBarBtnStyle, GUILayout.Width(10));
         GUILayout.EndHorizontal();
         GUILayout.EndArea();
@@ -220,23 +291,27 @@ public class BehaviourTreeWindow : EditorWindow
         if (GUI.changed) Repaint();
     }
 
-    private void CreateData()
+    private void LoadTree()
     {
-    }
-
-    private void LoadData()
-    {
-        string path = EditorUtility.OpenFilePanel("加载数据", Application.dataPath, "txt");
+        string path = EditorUtility.OpenFilePanel("加载数据", Application.dataPath, "bytes");
         if (path.Length != 0)
         {
+            BTData btData = BTUtil.DeSerializerObject(path, typeof(BTData), m_lstNodeDataType.ToArray()) as BTData;
+            CreateTree(btData);
         }
     }
 
-    private void SaveData()
+    private void SaveTree()
     {
-        string path = EditorUtility.SaveFilePanel("保存数据", Application.dataPath, "", "txt");
+        if (m_cRoot == null) return;
+        var node = m_cRoot.node as BTNode;
+        if (node == null) return;
+        BTData data = node.GetData();
+        string path = EditorUtility.SaveFilePanel("保存数据", Application.dataPath, "", "bytes");
         if (path.Length != 0)
         {
+            BTUtil.SerializerObject(path, data, m_lstNodeDataType.ToArray()); 
         }
     }
 }
+

@@ -363,6 +363,12 @@ namespace NodeEditor
         {
             m_lstNode.Clear();
             m_lstConnection.Clear();
+        }
+
+        public void Dispose()
+        {
+            m_lstNode.Clear();
+            m_lstConnection.Clear();
             m_fCreateNodeFunc = null;
         }
     }
