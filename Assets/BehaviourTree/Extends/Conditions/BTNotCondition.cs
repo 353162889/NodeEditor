@@ -21,9 +21,14 @@ namespace BTCore
             if (m_cChild != null)
             {
                 Debug.LogError("BTDecorator has exist child node! add has override it");
+                if (m_lstChild != null && m_lstChild.Contains(m_cChild))
+                {
+                    m_lstChild.Remove(m_cChild);
+                }
             }
             if (child is BTCondition)
             {
+                base.AddChild(child);
                 m_cChild = (BTCondition)child;
             }
             else
@@ -40,10 +45,8 @@ namespace BTCore
 
         public override void Clear()
         {
-            if (m_cChild != null)
-            {
-                m_cChild.Clear();
-            }
+            m_cChild = null;
+            base.Clear();
         }
     }
 }

@@ -22,29 +22,13 @@ namespace BTCore
             if (m_cChild != null)
             {
                 Debug.LogError("BTRoot has exist child node! add has override it");
-            }
-            m_cChild = child;
-        }
-
-        public override BTData GetData()
-        {
-            if (m_cData == null)
-            {
-                Debug.LogError(this.GetType() + " m_cData == null,need initialize！");
-                return null;
-            }
-            BTData btData = new BTData();
-            btData.data = m_cData;
-            if (m_cChild != null)
-            {
-                btData.lstChild = new List<BTData>();
-                BTData data = m_cChild.GetData();
-                if (data != null)
+                if (m_lstChild != null && m_lstChild.Contains(m_cChild))
                 {
-                    btData.lstChild.Add(data);
+                    m_lstChild.Remove(m_cChild);
                 }
             }
-            return btData;
+            m_cChild = child;
+            base.AddChild(child);
         }
 
         sealed public override BTResult OnTick(BTBlackBoard blackBoard)
@@ -55,61 +39,8 @@ namespace BTCore
 
         public override void Clear()
         {
-            if (m_cChild != null) m_cChild.Clear();
-        }
-    }
-
-
-
-    public class BTRootData1
-    {
-    }
-    [NENode(typeof(BTRootData1))]
-    [NENodeDisplay(false, true, false)]
-    [NEName("Root1")]
-    public class BTRoot1 : BTNode
-    {
-        protected BTNode m_cChild;
-
-        public override void AddChild(BTNode child)
-        {
-            if (m_cChild != null)
-            {
-                Debug.LogError("BTRoot has exist child node! add has override it");
-            }
-            m_cChild = child;
-        }
-
-        public override BTData GetData()
-        {
-            if (m_cData == null)
-            {
-                Debug.LogError(this.GetType() + " m_cData == null,need initialize！");
-                return null;
-            }
-            BTData btData = new BTData();
-            btData.data = m_cData;
-            if (m_cChild != null)
-            {
-                btData.lstChild = new List<BTData>();
-                BTData data = m_cChild.GetData();
-                if (data != null)
-                {
-                    btData.lstChild.Add(data);
-                }
-            }
-            return btData;
-        }
-
-        sealed public override BTResult OnTick(BTBlackBoard blackBoard)
-        {
-            if (m_cChild != null) return m_cChild.OnTick(blackBoard);
-            return BTResult.Success;
-        }
-
-        public override void Clear()
-        {
-            if (m_cChild != null) m_cChild.Clear();
+            m_cChild = null;
+            base.Clear();
         }
     }
 }

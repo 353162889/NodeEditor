@@ -15,6 +15,7 @@ namespace BTCore
         protected List<BTNode> m_lstChild;
         [NENodeData]
         protected object m_cData;
+        public object data { get { return m_cData; } }
        
         public virtual BTResult OnTick(BTBlackBoard blackBoard){ return BTResult.Success; }
 

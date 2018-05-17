@@ -14,17 +14,15 @@ namespace BTCore
     [NENode(typeof(BTAndConditionData))]
     public class BTAndCondition : BTCondition
     {
-        private List<BTCondition> m_lstCondition;
         public BTAndCondition()
         {
-            m_lstCondition = new List<BTCondition>();
         }
 
         public override void AddChild(BTNode child)
         {
             if (child is BTCondition)
             {
-                m_lstCondition.Add((BTCondition)child);
+                base.AddChild(child);
             }
             else
             {
@@ -35,21 +33,13 @@ namespace BTCore
         public override bool Evaluate(BTBlackBoard blackBoard)
         {
             bool result = true;
-            int count = m_lstCondition.Count;
+            if (m_lstChild == null) return result;
+            int count = m_lstChild.Count;
             for (int i = 0; i < count; i++)
             {
-                result = result && m_lstCondition[i].Evaluate(blackBoard);
+                result = result && (m_lstChild[i] as BTCondition).Evaluate(blackBoard);
             }
             return result;
-        }
-
-        public override void Clear()
-        {
-            int count = m_lstCondition.Count;
-            for (int i = 0; i < count; i++)
-            {
-                m_lstCondition[i].Clear();
-            }
         }
     }
 }
