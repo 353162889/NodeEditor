@@ -11,7 +11,7 @@ namespace BTCore
         Running,
         Failure,
     }
-    abstract public class BTNode {
+    abstract public class BTNode : INENode{
         protected List<BTNode> m_lstChild;
         [NENodeData]
         protected object m_cData;
@@ -27,28 +27,28 @@ namespace BTCore
             m_lstChild.Add(child);
         }
 
-        public virtual BTData GetData()
+        public virtual NEData GetData()
         {
             if(m_cData == null)
             {
                 Debug.LogError(this.GetType() + " m_cData == null,need initialize！");
                 return null;
             }
-            BTData btData = new BTData();
-            btData.data = m_cData;
+            NEData neData = new NEData();
+            neData.data = m_cData;
             if (m_lstChild != null && m_lstChild.Count > 0)
             {
-                btData.lstChild = new List<BTData>();
+                neData.lstChild = new List<NEData>();
                 for (int i = 0; i < m_lstChild.Count; i++)
                 {
-                    BTData data = m_lstChild[i].GetData();
+                    NEData data = m_lstChild[i].GetData();
                     if (data != null)
                     {
-                        btData.lstChild.Add(data);
+                        neData.lstChild.Add(data);
                     }
                 }
             }
-            return btData;
+            return neData;
         }
 
         public virtual void Clear() {

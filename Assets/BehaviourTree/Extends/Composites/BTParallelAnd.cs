@@ -8,8 +8,6 @@ namespace BTCore
 {
     public class BTParallelAndData
     {
-        public string a;
-        public int b;
     }
 
     [NENode(typeof(BTParallelAndData))]

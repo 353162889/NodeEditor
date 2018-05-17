@@ -15,7 +15,7 @@ namespace NodeEditor
         private GUIStyle m_cCenterAreaStyle;
         private GUIStyle m_cRightAreaStyle;
 
-        [MenuItem("Tools/OpenNEDemoWindow")]
+        //[MenuItem("Tools/OpenNEDemoWindow")]
         static public void OpenWindow()
         {
             var window = EditorWindow.GetWindow<NEDemoWindow>();

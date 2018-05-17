@@ -4,9 +4,9 @@ using System.Text;
 using System.Xml.Serialization;
 using UnityEngine;
 
-namespace BTCore
+namespace NodeEditor
 {
-    public class BTUtil
+    public class NEUtil
     {
         public static object DeSerializerObject(string path, Type type,Type[] extraTypes = null)
         {

@@ -4,12 +4,12 @@ using System.Linq;
 using System.Text;
 using UnityEngine;
 
-namespace BTCore
+namespace NodeEditor
 {
-    public class BTData
+    public class NEData
     {
         public Vector2 editorPos;
         public object data;
-        public List<BTData> lstChild;
+        public List<NEData> lstChild;
     }
 }
