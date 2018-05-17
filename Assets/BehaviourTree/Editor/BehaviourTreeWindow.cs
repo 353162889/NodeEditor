@@ -351,6 +351,18 @@ public class BehaviourTreeWindow : EditorWindow
         }
     }
 
+    private void DebugBtData(BTData btData)
+    {
+        Debug.Log(btData.editorPos+","+btData.data.GetType());
+        if(btData.lstChild != null)
+        {
+            for (int i = 0; i < btData.lstChild.Count; i++)
+            {
+                DebugBtData(btData.lstChild[i]);
+            }
+        }
+    }
+
     private BTData GetCurrentTreeBTData()
     {
         if (m_cRoot == null) return null;
@@ -374,18 +386,35 @@ public class BehaviourTreeWindow : EditorWindow
         btData.data = btNode.data;
         btData.editorPos = node.rect.center;
 
+        List<NENode> lstSubNode = new List<NENode>();
         for (int i = 0; i < lst.Count; i++)
         {
             NEConnection connection = lst[i];
             if(connection.outPoint.node == node)
             {
                 NENode childNode = connection.inPoint.node;
-                BTData childBTData = GetNodeBTData(childNode, lst, handNodes);
-                if (btData.lstChild == null) btData.lstChild = new List<BTData>();
-                btData.lstChild.Add(childBTData);
+                lstSubNode.Add(childNode);
             }
         }
+        lstSubNode.Sort(NodeSort);
+        for (int i = 0; i < lstSubNode.Count; i++)
+        {
+            NENode childNode = lstSubNode[i];
+            BTData childBTData = GetNodeBTData(childNode, lst, handNodes);
+            if (btData.lstChild == null) btData.lstChild = new List<BTData>();
+            btData.lstChild.Add(childBTData);
+        }
+        
         return btData;
+    }
+
+    //按照位置排序
+    private int NodeSort(NENode a,NENode b)
+    {
+        int res = 0;
+        if (a.rect.center.x - b.rect.center.x > 0) res = 1;
+        else if (a.rect.center.x - b.rect.center.x < 0) res = -1;
+        return res;
     }
 }
 
